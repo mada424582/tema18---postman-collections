@@ -1,0 +1,360 @@
+{
+	"info": {
+		"_postman_id": "7b23624b-0675-478b-b699-1c2760266bb1",
+		"name": "Tema 18 - Madalina Munteanu",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19422172"
+	},
+	"item": [
+		{
+			"name": "/user/register.php",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const timestamp = Date.now();\r",
+							"\r",
+							"// Creează un email unic\r",
+							"const uniqueEmail = `user${timestamp}@example.com`;\r",
+							"const uniqueUsername = `user_${timestamp}`;\r",
+							"\r",
+							"// Salvează email-ul în variabila de mediu\r",
+							"pm.environment.set(\"uniqueEmail\", uniqueEmail);\r",
+							"pm.environment.set(\"uniqueUsername\", uniqueUsername);\r",
+							"\r",
+							"// Afișează în consola Postman (opțional)\r",
+							"console.log(\"Email generat:\", uniqueEmail);\r",
+							"console.log(\"Username:\", uniqueUsername);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"// Salvează confirmation_token și alte variabile utile\r",
+							"pm.environment.set(\"confirmation_token\", responseJson.confirmation_token);\r",
+							"pm.environment.set(\"apiKey\", responseJson.api_key);\r",
+							"pm.environment.set(\"userId\", responseJson.user_id);\r",
+							"pm.environment.set(\"username\", responseJson.username);\r",
+							"\r",
+							"// Debug\r",
+							"console.log(\"Confirmation Token:\", responseJson.confirmation_token);\r",
+							"console.log(\"API Key:\", responseJson.api_key);\r",
+							"console.log(\"Username:\", responseJson.username);\r",
+							"console.log(\"Unique Email:\", pm.environment.get(\"uniqueEmail\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{uniqueEmail}}\",\r\n  \"username\": \"{{uniqueUsername}}\",\r\n  \"password\": \"Accident2020!\",\r\n  \"first_name\": \"Madalina\",\r\n  \"last_name\": \"Munteanu\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/register.php",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"register.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Postlogin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"// token JWT\r",
+							"pm.environment.set(\"bearer_token\", responseJson.token);\r",
+							"pm.environment.set(\"authToken\", responseJson.token);\r",
+							"\r",
+							"// userId CORECT\r",
+							"pm.environment.set(\"userId\", responseJson.user.id);\r",
+							"\r",
+							"// debug\r",
+							"console.log(\"Bearer Token:\", pm.environment.get(\"bearer_token\"));\r",
+							"console.log(\"Auth Token:\", pm.environment.get(\"authToken\"));\r",
+							"console.log(\"User ID:\", pm.environment.get(\"userId\"));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"Accident2020!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/login.php",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"login.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET PROFILE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Email matches generated email\", function () {\r",
+							"    pm.expect(responseJson.email).to.eql(pm.environment.get(\"uniqueEmail\"));\r",
+							"    \r",
+							"    pm.test(\"User ID matches\", function () {\r",
+							"    pm.expect(responseJson.user_id).to.eql(pm.environment.get(\"userId\"));\r",
+							"});\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{apiKey}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/get_profile.php?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"get_profile.php"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"User deleted successfully\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson.status).to.eql(\"success\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{bearer_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/delete_profile.php",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"delete_profile.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PostConfirmationAccount",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const responseJson = pm.response.json();\r",
+							"pm.test(\"Account confirmed successfully\", function () {\r",
+							"    pm.expect(responseJson.status).to.eql(\"success\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"confirmation_token\": \"{{confirmationToken}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}//user/confirm.php",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"",
+						"user",
+						"confirm.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GETUserConfirmation",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/confirm_email.php?token={{confirmation_token}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"confirm_email.php"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{confirmation_token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
